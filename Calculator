@@ -1,0 +1,195 @@
+import tkinter
+import math
+#buttons
+button_values = [
+    ["%", "AC", "C","⌫"], 
+    ["¹/ₓ","X²","√",  "÷",],
+    ["7", "8", "9", "×"], 
+    ["4", "5", "6", "-"],
+    ["1", "2", "3", "+"],
+    ["+/-","0",".", "="]
+]
+
+Spl_symblos=["¹/ₓ","√","X²",]
+right_symbols = ["÷", "×", "-", "+", "="]
+top_symbols = ["AC", "+/-", "%",".","C","⌫"]
+
+#rows and coloums
+row_count=len(button_values)
+column_count=len(button_values[0])
+
+#colours
+colour_light_gray="#D4D4D2"
+colour_black="#1C1C1C"
+colour_dark_gray="#505050"
+colour_orange="#FF9500"
+colour_white="white"
+
+window=tkinter.Tk()
+
+window.title("Calculator")
+window.resizable(False,False)
+
+frame=tkinter.Frame(window)
+label=tkinter.Label( frame ,text="0",font=("Ariel",45),background=colour_black,foreground=colour_white,
+                    anchor="e",width=column_count)
+
+label.grid(row=0,column=0,columnspan=column_count,sticky="we")
+
+for row in range(row_count):
+    for column in range(column_count):
+            value = button_values[row][column]
+            button=tkinter.Button(frame,text=value,font=("Ariel",30),width=column_count-1,height=1,
+                                command=lambda value=value: button_clicked(value))
+            
+            if value in top_symbols:
+                button.config(background=colour_light_gray,foreground=colour_black)
+            elif value in Spl_symblos:
+                button.config(background=colour_black,foreground=colour_white)
+            elif value in right_symbols:
+                button.config(background=colour_orange,foreground=colour_white)
+            else:
+                button.config(background=colour_dark_gray,foreground=colour_white)
+
+            button.grid(row=row+1,column=column)
+
+frame.pack()
+
+#A+B A-B A/B A*B
+A=0
+operator=None
+B=None
+
+count = 0
+
+def clear_all():
+    global count,A,operator,B
+    A=0
+    operator=None
+    B=None
+    count=0
+
+
+def remove_zero_decimal(num):
+    n=str(num)
+    i=0
+    a=""
+    if len(n)>9:
+        for i in range(0,9):
+            a += n[i]
+    else:
+        for i in range(0,len(n)):
+            a += n[i]
+
+
+    n = float (a)
+    if n%1 == 0:
+            n = int(n)
+    return str(n)
+
+
+def button_clicked(value):
+    global count,Spl_symblos,right_symbols,top_symbol,A,operator,B
+
+    if value in right_symbols:
+        if value == "=":
+            if A is not None and operator is not None:
+                        B=label["text"]
+                        numA = float(A)
+                        numB = float(B)
+
+
+                        if operator == "+":
+                            result=float(remove_zero_decimal(numA+numB))
+                            if result>100000000:
+                                label["text"]="Error"
+                            else:
+                                label["text"]=remove_zero_decimal(numA+numB)
+                        elif operator == "-":
+                            result=float(remove_zero_decimal(numA-numB))
+                            if result<-100000000:
+                                label["text"]="Error"
+                            else:
+                                label["text"]=remove_zero_decimal(numA-numB)
+                        elif operator == "÷":
+                            if numB == 0:
+                                label["text"]="Error"
+                            else:
+                                label["text"]=remove_zero_decimal(numA/numB)
+                        elif operator == "×":
+                            result=float(remove_zero_decimal(numA*numB))
+                            if result>100000000:
+                                label["text"]="Error"
+                            else:
+                                label["text"]=remove_zero_decimal(numA*numB)                          
+                            remove_zero_decimal(numA*numB)
+                        
+                        clear_all()
+        
+        elif value in "+-×÷":
+            if operator is None:
+                A=label["text"]
+                label["text"] = "0"
+                B=0
+            count=0
+            operator = value
+   #"¹/ₓ","√","X²" 
+    elif value in Spl_symblos:
+            if value == "√":
+                A=float(label["text"])
+                result=(math.sqrt(A))
+                label["text"] = remove_zero_decimal(result)
+            elif value == "X²":
+                A=float(label["text"])
+                result=(math.pow(A,2))
+                label["text"]=remove_zero_decimal(result)
+            elif value == "¹/ₓ":
+                A=float(label["text"])
+                if A == 0:
+                    label["text"]="Error"
+                else:
+                    result=(1/A)
+                    label["text"]=remove_zero_decimal(result)
+    
+    elif value in top_symbols:
+        if value =="AC":
+            clear_all()
+            label["text"]="0"
+        elif value =="+/-":
+            result = float(label["text"]) * -1
+            label["text"]=remove_zero_decimal(result)
+        elif value == "%":
+            result = float(label["text"]) / 100
+            label["text"]=remove_zero_decimal(result)
+        elif value == ".":
+            if value not in label["text"]:
+                label["text"] += value
+    
+    
+    else:
+        
+        if value in "0123456789":
+            count+=1
+            if count<9:
+                if label["text"]== "0":
+                    label["text"] = value
+                else:
+                    label["text"] += value    
+
+#to centre the window
+window.update()
+window.update_idletasks()   #update window with the new dimensions
+
+window_width=window.winfo_width()
+window_height= window.winfo_height()
+screen_width= window.winfo_screenwidth()
+screen_height=window.winfo_screenheight()
+
+window_x=int((screen_width/2)-(window_width/2))
+window_y=int((screen_height/2)-(window_height/2))
+
+#format "(w)x(h)+(x)+(y)"
+window.geometry(f"{window_width}x{window_height}+{window_x}+{window_y}")
+
+window.mainloop()
+
